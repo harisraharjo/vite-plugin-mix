@@ -35,7 +35,7 @@ export default ({
       const handlerFile = getHandlerFile()
       devServer.middlewares.use(async (req, res, next) => {
         try {
-          const mod = await devServer.ssrLoadModule(`/@fs/${handlerFile}`)
+          const loader = devServer.ssrLoadModule(`/@fs/${handlerFile}`)
           const server = polka({
             onNoMatch: () => next(),
           })
@@ -44,6 +44,8 @@ export default ({
             req.viteServer = devServer
             next()
           })
+
+          const mod = await loader  
           if (Array.isArray(mod.handler)) {
             mod.handler.forEach((handler) => server.use(handler))
           } else {
@@ -66,15 +68,13 @@ export default ({
       adapter = adapter || nodeAdapter()
 
       const serverOutDir = path.join(root, 'build')
-
-      const handlerFile = getHandlerFile()
-
       const buildOpts = { root, serverOutDir, clientOutDir: clientOutDir! }
-
+      
       if (adapter.buildStart) {
         await adapter.buildStart(buildOpts)
       }
-
+      
+      const handlerFile = getHandlerFile()
       const indexHtmlPath = path.join(clientOutDir!, 'index.html')
       const indexHtml = fs.readFileSync(indexHtmlPath, 'utf8')
       fs.unlinkSync(indexHtmlPath)

@@ -28,10 +28,11 @@ export const copyDir = async (fromDir: string, toDir: string) => {
   const files = await glob('**/*', { cwd: fromDir, filesOnly: true })
   await Promise.all(
     files.map(async (file) => {
-      const fromPath = path.join(fromDir, file)
       const toPath = path.join(toDir, file)
-      await mkdirp(path.dirname(toPath))
-      await fs.promises.copyFile(fromPath, toPath)
+      const temp = mkdirp(path.dirname(toPath))
+      const fromPath = path.join(fromDir, file)
+      await temp
+      return fs.promises.copyFile(fromPath, toPath)
     }),
   )
 }
